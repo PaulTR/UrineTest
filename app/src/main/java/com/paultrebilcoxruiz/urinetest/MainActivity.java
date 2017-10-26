@@ -13,6 +13,8 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.android.things.contrib.driver.button.Button;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -24,6 +26,10 @@ public class MainActivity extends Activity implements ImageReader.OnImageAvailab
     private Handler mCameraBackgroundHandler;
     private HandlerThread mCameraBackgroundThread;
     private AnalysisCamera mCamera;
+
+    private DatabaseReference databaseRef;
+
+    private static final String RESULTS_URL = "https://iot-urine-test.firebaseio.com/";
 
     private static final String LEUKOCYTE_SMALL = "c3b1b1";
     private static final String LEUKOCYTE_MODERATE = "bba7c0";
@@ -45,6 +51,7 @@ public class MainActivity extends Activity implements ImageReader.OnImageAvailab
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        initDatabase();
         initCamera();
 
         try {
@@ -66,6 +73,10 @@ public class MainActivity extends Activity implements ImageReader.OnImageAvailab
         } catch( IOException e ) {
 
         }
+    }
+
+    private void initDatabase() {
+        databaseRef = FirebaseDatabase.getInstance().getReferenceFromUrl(RESULTS_URL);
     }
 
     private void initCamera() {
@@ -99,10 +110,21 @@ public class MainActivity extends Activity implements ImageReader.OnImageAvailab
             String nitrateColor = getColorHex(getDominantColor(nitriteSquare));
             String phColor = getColorHex(getDominantColor(phSquare));
 
+            uploadResults(getLeukocytesReading(leukocytesColor), getNitrateReading(nitrateColor), getPhLevel(phColor));
             Log.e("Test", "leukocytes: " + getLeukocytesReading(leukocytesColor));
             Log.e("Test", "nitrates: " + getNitrateReading(nitrateColor));
             Log.e("Test", "ph: " + getPhLevel(phColor));
         }
+    }
+
+    private void uploadResults(String leukocytes, String nitrate, String ph) {
+        Results results = new Results();
+        results.setLeukocytes(leukocytes);
+        results.setNitrates(nitrate);
+        results.setPh(ph);
+
+        DatabaseReference ref = databaseRef.push();
+        ref.setValue(results);
     }
 
     private String getNitrateReading(String nitrateColor) {
