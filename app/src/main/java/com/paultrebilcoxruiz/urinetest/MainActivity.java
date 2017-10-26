@@ -190,9 +190,9 @@ public class MainActivity extends Activity implements ImageReader.OnImageAvailab
     }
 
     private boolean isWhiteish(Bitmap image, int width, int height) {
-        return Color.red(image.getPixel(width, height)) >= 230
-                && Color.green(image.getPixel(width, height)) >= 230
-                && Color.blue(image.getPixel(width, height)) >= 230;
+        return Color.red(image.getPixel(width, height)) >= 210
+                && Color.green(image.getPixel(width, height)) >= 210
+                && Color.blue(image.getPixel(width, height)) >= 210;
     }
 
     private Bitmap trimToNextAllWhiteSpace(Bitmap bitmap, int height) {
